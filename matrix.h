@@ -19,8 +19,8 @@ namespace linalg {
 
             size_t size() const noexcept;
             T &operator[](const size_t &_index_) noexcept;
-            T operator[](const size_t &_index_) const noexcept;
-            T at(const size_t &_index_) const;
+            const T& operator[](const size_t &_index_) const noexcept;
+            const T& at(const size_t &_index_) const;
             T &at(const size_t &_index_);
         private:
             T *_ptr = nullptr;
@@ -42,9 +42,9 @@ namespace linalg {
         size_t capacity() const noexcept;
         bool empty() const noexcept;
 
-        T at(const size_t &row, const size_t &column) const;
+        const T& at(const size_t &row, const size_t &column) const;
         T &at(const size_t &row, const size_t &column);
-        T operator()(const size_t &row, const size_t &column) const noexcept;
+        const T& operator()(const size_t &row, const size_t &column) const noexcept;
         T &operator()(const size_t &row, const size_t &column) noexcept;
         const Vector operator[](const size_t &row) const noexcept;
         Vector operator[](const size_t &row) noexcept;
@@ -63,6 +63,8 @@ namespace linalg {
         void reserve(const size_t &_capacity_);
         void shrink_to_fit();
         void clear() noexcept;
+    private:
+        template <class T2> void copy_constructor_instructions(const Matrix<T2>& matrix);
     private:
         T *m_ptr = nullptr;
         size_t m_columns = 0, m_rows = 0;

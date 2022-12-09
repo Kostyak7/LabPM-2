@@ -138,7 +138,7 @@ namespace linalg {
     }
 
     template <class T>
-    T Matrix<T>::Vector::operator[](const size_t& _index_) const noexcept{
+    const T& Matrix<T>::Vector::operator[](const size_t& _index_) const noexcept{
         return _ptr[_index_];
     }
     template <class T>
@@ -146,7 +146,7 @@ namespace linalg {
         return _ptr[_index_];
     }
     template <class T>
-    T Matrix<T>::Vector::at(const size_t &_index_) const {
+    const T& Matrix<T>::Vector::at(const size_t &_index_) const {
         if (_index_ > _size) throw OutOfRange();
         return _ptr[_index_];
     }
@@ -201,51 +201,11 @@ namespace linalg {
     }
     template <class T>
     Matrix<T>::Matrix(const Matrix<T>& matrix) {
-        if (matrix.empty()) return;
-        T *tmp_ptr = reinterpret_cast<T*>(operator new(sizeof(T) * matrix.m_rows * matrix.m_columns));
-        size_t i, j;
-
-        try {
-            for (i = 0; i < matrix.m_rows; ++i) {
-                for (j = 0; j < matrix.m_columns; ++j) {
-                    new(tmp_ptr + i * matrix.m_columns + j) T(matrix(i, j));
-                }
-            }
-        } catch (...) {
-            for (T* cur_ptr = tmp_ptr + i * matrix.m_columns + j; cur_ptr >= tmp_ptr; --cur_ptr) {
-                cur_ptr->~T();
-            }
-            delete reinterpret_cast<void *>(tmp_ptr);
-            throw;
-        }
-        m_ptr = tmp_ptr;
-        m_capacity = matrix.m_rows * matrix.m_columns;
-        m_rows = matrix.m_rows;
-        m_columns = matrix.m_columns;
+        copy_constructor_instructions(matrix);
     }
     template <class T> template <class T2>
     Matrix<T>::Matrix(const Matrix<T2>& matrix) {
-        if (matrix.empty()) return;
-        T *tmp_ptr = reinterpret_cast<T*>(operator new(sizeof(T) * matrix.rows() * matrix.columns()));
-        size_t i, j;
-
-        try {
-            for (i = 0; i < matrix.rows(); ++i) {
-                for (j = 0; j < matrix.columns(); ++j) {
-                    new(tmp_ptr + i * matrix.columns() + j) T(matrix(i, j));
-                }
-            }
-        } catch (...) {
-            for (T* cur_ptr = tmp_ptr + i * matrix.columns() + j; cur_ptr >= tmp_ptr; --cur_ptr) {
-                cur_ptr->~T();
-            }
-            delete reinterpret_cast<void *>(tmp_ptr);
-            throw;
-        }
-        m_ptr = tmp_ptr;
-        m_capacity = matrix.rows() * matrix.columns();
-        m_rows = matrix.rows();
-        m_columns = matrix.columns();
+        copy_constructor_instructions(matrix);
     }
     template <class T>
     Matrix<T>::Matrix(Matrix<T>&& matrix) noexcept {
@@ -335,7 +295,7 @@ namespace linalg {
     }
 
     template <class T>
-    T Matrix<T>::at(const size_t &row, const size_t &column) const {
+    const T& Matrix<T>::at(const size_t &row, const size_t &column) const {
         if (row * m_columns + column > m_columns * m_rows) throw OutOfRange();
         return (*this)(row, column);
     }
@@ -345,7 +305,7 @@ namespace linalg {
         return (*this)(row, column);
     }
     template <class T>
-    T Matrix<T>::operator()(const size_t& row, const size_t& column) const noexcept{
+    const T& Matrix<T>::operator()(const size_t& row, const size_t& column) const noexcept{
         return m_ptr[row * m_columns + column];
     }
     template <class T>
@@ -364,15 +324,7 @@ namespace linalg {
     template <class T>
     Matrix<T>& Matrix<T>::operator=(const Matrix& matrix) {
         if (this == &matrix) return *this;
-        if (matrix.columns() * matrix.rows() > m_capacity) return *this = Matrix(matrix);
-        for (size_t i =0; i < matrix.rows(); ++i) {
-            for (size_t j =0; j < matrix.columns(); ++j) {
-                (*this)(i, j) = matrix(i, j);
-            }
-        }
-        m_rows = matrix.rows();
-        m_columns = matrix.columns();
-        return *this;
+        return operator=<T>(matrix);
     }
     template <class T> template <class T2>
     Matrix<T>& Matrix<T>::operator=(const Matrix<T2>& matrix) {
@@ -469,6 +421,11 @@ namespace linalg {
                 tmp_ptr[i * m_columns + j] = m_ptr[i * m_columns + j];
             }
         }
+        if (!empty()) {
+            for (T *del_ptr = m_ptr + m_columns * m_rows - 1; del_ptr >= m_ptr; --del_ptr) {
+                cur_ptr->~T();
+            }
+        }
         m_ptr = tmp_ptr;
         m_capacity = _capacity_;
     }
@@ -487,4 +444,27 @@ namespace linalg {
         m_columns = m_rows = 0;
     }
 
+    template <class T> template <class T2>
+    void Matrix<T>::copy_constructor_instructions(const Matrix<T2>& matrix) {
+        if (matrix.empty()) return;
+        T *tmp_ptr = reinterpret_cast<T*>(operator new(sizeof(T) * matrix.rows() * matrix.columns()));
+        size_t i, j;
+        try {
+            for (i = 0; i < matrix.rows(); ++i) {
+                for (j = 0; j < matrix.columns(); ++j) {
+                    new(tmp_ptr + i * matrix.columns() + j) T(matrix(i, j));
+                }
+            }
+        } catch (...) {
+            for (T* cur_ptr = tmp_ptr + i * matrix.columns() + j; cur_ptr >= tmp_ptr; --cur_ptr) {
+                cur_ptr->~T();
+            }
+            delete reinterpret_cast<void *>(tmp_ptr);
+            throw;
+        }
+        m_ptr = tmp_ptr;
+        m_capacity = matrix.rows() * matrix.columns();
+        m_rows = matrix.rows();
+        m_columns = matrix.columns();
+    }
 } // namespace linalg
