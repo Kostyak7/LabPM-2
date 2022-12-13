@@ -7,12 +7,13 @@
 namespace linalg {
 
     //////////////////////OUT////////////////////////////////////
-    template <class T>
-    void swap(Matrix<T>& matrix1, Matrix<T>& matrix2) noexcept{
+    template<class T>
+    void swap(Matrix<T> &matrix1, Matrix<T> &matrix2) noexcept {
         matrix1.swap(matrix2);
     }
-    template <class T>
-    bool operator==(const Matrix<T>& matrix1, const Matrix<T>& matrix2) {
+
+    template<class T>
+    bool operator==(const Matrix<T> &matrix1, const Matrix<T> &matrix2) {
         if (&matrix1 == &matrix2) return true;
         if (matrix1.columns() != matrix2.columns() || matrix1.rows() != matrix2.rows()) return false;
         for (size_t i = 0; i < matrix1.rows(); ++i) {
@@ -22,8 +23,9 @@ namespace linalg {
         }
         return true;
     }
-    template <class T1, class T2>
-    bool operator==(const Matrix<T1>& matrix1, const Matrix<T2>& matrix2) {
+
+    template<class T1, class T2>
+    bool operator==(const Matrix<T1> &matrix1, const Matrix<T2> &matrix2) {
         if (matrix1.columns() != matrix2.columns() || matrix1.rows() != matrix2.rows()) return false;
         for (size_t i = 0; i < matrix1.rows(); ++i) {
             for (size_t j = 0; j < matrix1.columns(); ++j) {
@@ -32,54 +34,68 @@ namespace linalg {
         }
         return true;
     }
-    template <class T1, class T2>
-    inline bool operator!=(const Matrix<T1>& matrix1, const Matrix<T2>& matrix2) {
+
+    template<class T1, class T2>
+    inline bool operator!=(const Matrix<T1> &matrix1, const Matrix<T2> &matrix2) {
         return !(matrix1 == matrix2);
     }
 
-    template <class T, class T2>
-    auto operator*(const T2& value, const Matrix<T>& matrix)->Matrix<decltype(T()*T2())> {
-        return Matrix<decltype(T()*T2())>(matrix) *= value;
+    template<class T, class T2>
+    auto operator*(const T2 &value, const Matrix<T> &matrix) -> Matrix<decltype(T() * T2())> {
+        return Matrix<decltype(T() * T2())>(matrix) *= value;
     }
-    template <class T, class T2>
-    auto operator*(const Matrix<T>& matrix, const T2& value)->Matrix<decltype(T()*T2())> {
-        return Matrix<decltype(T()*T2())>(matrix) *= value;
+
+    template<class T, class T2>
+    auto operator*(const Matrix<T> &matrix, const T2 &value) -> Matrix<decltype(T() * T2())> {
+        return Matrix<decltype(T() * T2())>(matrix) *= value;
     }
-    template <class T, class T2>
-    auto operator+(const Matrix<T>& matrix1, const Matrix<T2>& matrix2)->Matrix<decltype(T() + T2())> {
+
+    template<class T, class T2>
+    auto operator+(const Matrix<T> &matrix1, const Matrix<T2> &matrix2) -> Matrix<decltype(T() + T2())> {
         return Matrix<decltype(T() + T2())>(matrix1) += matrix2;
     }
-    template <class T>
-    Matrix<T> operator-(const Matrix<T>& matrix) {
-        return Matrix<T>((-1) * matrix);
+
+    template<class T>
+    Matrix<T> operator-(const Matrix<T> &matrix) {
+        if (matrix.empty()) throw EmptyException();
+        Matrix tmp_matrix(matrix.rows(), matrix.columns());
+        for (size_t i = 0; i < matrix.rows(); ++i) {
+            for (size_t j = 0; j < matrix.rows(); ++j) {
+                tmp_matrix(i, j) = -matrix(i, j);
+            }
+        }
+        return tmp_matrix;
     }
-    template <class T, class T2>
-    auto operator-(const Matrix<T>& matrix1, const Matrix<T2>& matrix2)->Matrix<decltype(T() - T2())> {
+
+    template<class T, class T2>
+    auto operator-(const Matrix<T> &matrix1, const Matrix<T2> &matrix2) -> Matrix<decltype(T() - T2())> {
         return Matrix<decltype(T() + T2())>(matrix1) -= matrix2;
     }
-    template <class T, class T2>
-    auto operator*(const Matrix<T>& matrix1, const Matrix<T2>& matrix2)->Matrix<decltype(T()*T2())> {
+
+    template<class T, class T2>
+    auto operator*(const Matrix<T> &matrix1, const Matrix<T2> &matrix2) -> Matrix<decltype(T() * T2())> {
         return Matrix<decltype(T() + T2())>(matrix1) *= matrix2;
     }
 
     namespace {
         template<class T>
-        void put_widths(const Matrix<T> &matrix, size_t &w1, size_t& gw) {
+        void put_widths(const Matrix<T> &matrix, size_t &w1, size_t &gw) {
             w1 = gw = 0;
             for (size_t i = 0; i < matrix.rows(); ++i) {
                 std::stringstream ss;
                 ss << matrix(i, 0);
-                w1 = (ss.str().size() > w1)? ss.str().size(): w1;
+                w1 = (ss.str().size() > w1) ? ss.str().size() : w1;
                 for (size_t j = 1; j < matrix.rows(); ++j) {
                     ss.str("");
                     ss << matrix(i, j);
-                    gw = (ss.str().size() > gw)? ss.str().size(): gw;
+                    gw = (ss.str().size() > gw) ? ss.str().size() : gw;
                 }
             }
         }
     } // namespace
 
-    template <class T> std::ostream& operator<< (std::ostream& out, const Matrix<T>& matrix) {
+    template<class T>
+    std::ostream &operator<<(std::ostream &out, const Matrix<T> &matrix) {
         if (matrix.empty()) {
             out << "|Empty|";
         } else {
@@ -96,8 +112,8 @@ namespace linalg {
         return out;
     }
 
-    template <class T>
-    Matrix<T> trans(const Matrix<T>& matrix) {
+    template<class T>
+    Matrix<T> trans(const Matrix<T> &matrix) {
         Matrix<T> result(matrix.columns(), matrix.rows());
         for (size_t i = 0; i < matrix.rows(); ++i) {
             for (size_t j = 0; j < matrix.columns(); ++j) {
@@ -106,8 +122,9 @@ namespace linalg {
         }
         return result;
     }
-    template <class T>
-    T det(const Matrix<T>& matrix) {
+
+    template<class T>
+    T det(const Matrix<T> &matrix) {
         if (matrix.empty()) throw EmptyException();
         if (matrix.columns() != matrix.rows()) throw InvalidSizesException();
         if (matrix.rows() == 1) return matrix(0, 0);
@@ -128,42 +145,45 @@ namespace linalg {
 
     //////////////////////Vector/////////////////////////////////
 
-    template <class T>
-    Matrix<T>::Vector::Vector(T* const _ptr_,  const size_t& _size_) noexcept
-    : _ptr(_ptr_), _size(_size_) {}
+    template<class T>
+    Matrix<T>::Vector::Vector(T *const _ptr_, const size_t &_size_) noexcept
+            : _ptr(_ptr_), _size(_size_) {}
 
-    template <class T>
-    size_t Matrix<T>::Vector::size() const noexcept{
+    template<class T>
+    size_t Matrix<T>::Vector::size() const noexcept {
         return _size;
     }
 
-    template <class T>
-    const T& Matrix<T>::Vector::operator[](const size_t& _index_) const noexcept{
+    template<class T>
+    const T &Matrix<T>::Vector::operator[](const size_t &_index_) const noexcept {
         return _ptr[_index_];
     }
-    template <class T>
-    T& Matrix<T>::Vector::operator[](const size_t& _index_) noexcept{
+
+    template<class T>
+    T &Matrix<T>::Vector::operator[](const size_t &_index_) noexcept {
         return _ptr[_index_];
     }
-    template <class T>
-    const T& Matrix<T>::Vector::at(const size_t &_index_) const {
+
+    template<class T>
+    const T &Matrix<T>::Vector::at(const size_t &_index_) const {
         if (_index_ > _size) throw OutOfRange();
         return _ptr[_index_];
     }
-    template <class T>
+
+    template<class T>
     T &Matrix<T>::Vector::at(const size_t &_index_) {
         if (_index_ > _size) throw OutOfRange();
         return _ptr[_index_];
     }
 
     //////////////////////Matrix/////////////////////////////////
-    template <class T>
-    Matrix<T>::Matrix(const size_t& _rows_, const size_t& _columns_) {
+    template<class T>
+    Matrix<T>::Matrix(const size_t &_rows_, const size_t &_columns_) {
         if (_rows_ == 0 || _columns_ == 0) return;
         T *tmp_ptr = reinterpret_cast<T *>(operator new(sizeof(T) * _rows_ * _columns_));
         T *cur_ptr = tmp_ptr;
         try {
-            for (;cur_ptr != tmp_ptr + _rows_ * _columns_; ++cur_ptr) {
+            for (; cur_ptr != tmp_ptr + _rows_ * _columns_; ++cur_ptr) {
                 new(cur_ptr) T();
             }
         } catch (...) {
@@ -178,13 +198,15 @@ namespace linalg {
         m_rows = _rows_;
         m_columns = _columns_;
     }
-    template <class T> template<class T2>
-    Matrix<T>::Matrix(const size_t& _rows_, const size_t& _columns_, const T2& _default_value_) {
+
+    template<class T>
+    template<class T2>
+    Matrix<T>::Matrix(const size_t &_rows_, const size_t &_columns_, const T2 &_default_value_) {
         if (_rows_ == 0 || _columns_ == 0) return;
         T *tmp_ptr = reinterpret_cast<T *>(operator new(sizeof(T) * _rows_ * _columns_));
         T *cur_ptr = tmp_ptr;
         try {
-            for (;cur_ptr != tmp_ptr + _rows_ * _columns_; ++cur_ptr) {
+            for (; cur_ptr != tmp_ptr + _rows_ * _columns_; ++cur_ptr) {
                 new(cur_ptr) T(_default_value_);
             }
         } catch (...) {
@@ -199,19 +221,25 @@ namespace linalg {
         m_rows = _rows_;
         m_columns = _columns_;
     }
-    template <class T>
-    Matrix<T>::Matrix(const Matrix<T>& matrix) {
+
+    template<class T>
+    Matrix<T>::Matrix(const Matrix<T> &matrix) {
         copy_constructor_instructions(matrix);
     }
-    template <class T> template <class T2>
-    Matrix<T>::Matrix(const Matrix<T2>& matrix) {
+
+    template<class T>
+    template<class T2>
+    Matrix<T>::Matrix(const Matrix<T2> &matrix) {
         copy_constructor_instructions(matrix);
     }
-    template <class T>
-    Matrix<T>::Matrix(Matrix<T>&& matrix) noexcept {
+
+    template<class T>
+    Matrix<T>::Matrix(Matrix<T> &&matrix) noexcept {
         swap(matrix);
     }
-    template <class T> template <class T2>
+
+    template<class T>
+    template<class T2>
     Matrix<T>::Matrix(std::initializer_list<T2> _list_) {
         if (_list_.size() == 0) return;
         T *tmp_ptr = reinterpret_cast<T *>(operator new(sizeof(T) * _list_.size()));
@@ -233,19 +261,21 @@ namespace linalg {
         m_rows = _list_.size();
         m_columns = 1;
     }
-    template <class T> template <class T2>
+
+    template<class T>
+    template<class T2>
     Matrix<T>::Matrix(std::initializer_list<std::initializer_list<T2>> _list_) {
         if (_list_.size() == 0) return;
         size_t max_size_columns = 0;
-        for (auto lst: _list_){
+        for (auto lst: _list_) {
             if (max_size_columns < lst.size()) max_size_columns = lst.size();
         }
         T *tmp_ptr = reinterpret_cast<T *>(operator new(sizeof(T) * _list_.size() * max_size_columns));
-        long i = 0, j;
+        size_t i = 0, j;
         try {
-            for (auto lst: _list_) {
+            for (const auto &lst: _list_) {
                 j = 0;
-                for (auto el: lst) {
+                for (const auto &el: lst) {
                     new(tmp_ptr + i * max_size_columns + j) T(el);
                     ++j;
                 }
@@ -255,9 +285,9 @@ namespace linalg {
                 ++i;
             }
         } catch (...) {
-            i = i * max_size_columns + j;
-            for (; i >= 0; --i) {
-                (tmp_ptr + i)->~T();
+            long long tmp_i = i * max_size_columns + j;
+            for (; tmp_i >= 0; --tmp_i) {
+                (tmp_ptr + tmp_i)->~T();
             }
             delete reinterpret_cast<void *>(tmp_ptr);
             throw;
@@ -267,71 +297,87 @@ namespace linalg {
         m_rows = _list_.size();
         m_columns = max_size_columns;
     }
-    template <class T>
+
+    template<class T>
     Matrix<T>::~Matrix() {
         if (!empty()) {
             for (T *cur_ptr = m_ptr + m_columns * m_rows - 1; cur_ptr >= m_ptr; --cur_ptr) {
                 cur_ptr->~T();
             }
         }
-        delete reinterpret_cast<void*>(m_ptr);
+        delete reinterpret_cast<void *>(m_ptr);
     }
 
-    template <class T>
-    size_t Matrix<T>::rows() const noexcept{
+    template<class T>
+    size_t Matrix<T>::rows() const noexcept {
         return m_rows;
     }
-    template <class T>
-    size_t Matrix<T>::columns() const noexcept{
+
+    template<class T>
+    size_t Matrix<T>::columns() const noexcept {
         return m_columns;
     }
-    template <class T>
-    size_t Matrix<T>::capacity() const noexcept{
+
+    template<class T>
+    size_t Matrix<T>::capacity() const noexcept {
         return m_capacity;
     }
-    template <class T>
-    bool Matrix<T>::empty() const noexcept{
+
+    template<class T>
+    bool Matrix<T>::empty() const noexcept {
         return m_columns == 0 || m_rows == 0;
     }
 
-    template <class T>
-    const T& Matrix<T>::at(const size_t &row, const size_t &column) const {
+    template<class T>
+    const T &Matrix<T>::at(const size_t &row, const size_t &column) const {
         if (row * m_columns + column > m_columns * m_rows) throw OutOfRange();
         return (*this)(row, column);
     }
-    template <class T>
+
+    template<class T>
     T &Matrix<T>::at(const size_t &row, const size_t &column) {
         if (row * m_columns + column > m_columns * m_rows) throw OutOfRange();
         return (*this)(row, column);
     }
-    template <class T>
-    const T& Matrix<T>::operator()(const size_t& row, const size_t& column) const noexcept{
+
+    template<class T>
+    const T &Matrix<T>::operator()(const size_t &row, const size_t &column) const noexcept {
         return m_ptr[row * m_columns + column];
     }
-    template <class T>
-    T& Matrix<T>::operator()(const size_t& row, const size_t& column) noexcept{
+
+    template<class T>
+    T &Matrix<T>::operator()(const size_t &row, const size_t &column) noexcept {
         return m_ptr[row * m_columns + column];
     }
-    template <class T>
-    const typename Matrix<T>::Vector Matrix<T>::operator[](const size_t &row) const noexcept{
-        return Vector(m_ptr + m_columns * row, m_columns);
-    }
-    template <class T>
-    typename Matrix<T>::Vector Matrix<T>::operator[](const size_t &row) noexcept{
+
+    template<class T>
+    const typename Matrix<T>::Vector Matrix<T>::operator[](const size_t &row) const noexcept {
         return Vector(m_ptr + m_columns * row, m_columns);
     }
 
-    template <class T>
-    Matrix<T>& Matrix<T>::operator=(const Matrix& matrix) {
+    template<class T>
+    typename Matrix<T>::Vector Matrix<T>::operator[](const size_t &row) noexcept {
+        return Vector(m_ptr + m_columns * row, m_columns);
+    }
+
+    template<class T>
+    Matrix<T> &Matrix<T>::operator=(const Matrix &matrix) {
         if (this == &matrix) return *this;
         return operator=<T>(matrix);
     }
-    template <class T> template <class T2>
-    Matrix<T>& Matrix<T>::operator=(const Matrix<T2>& matrix) {
+
+    template<class T>
+    template<class T2>
+    Matrix<T> &Matrix<T>::operator=(const Matrix<T2> &matrix) {
         if (matrix.columns() * matrix.rows() > m_capacity) return *this = Matrix(matrix);
-        for (size_t i =0; i < matrix.rows(); ++i) {
-            for (size_t j =0; j < matrix.columns(); ++j) {
-                (*this)(i, j) = T(matrix(i, j));
+        for (size_t i = 0; i < matrix.rows(); ++i) {
+            for (size_t j = 0; j < matrix.columns(); ++j) {
+                m_ptr[i * matrix.columns() + j] = matrix(i, j);
+            }
+        }
+        if (matrix.rows() * matrix.columns() < m_rows * m_columns) {
+            for (size_t i = m_rows * m_columns - 1; i > matrix.rows() * matrix.columns() -1; --i) {
+                m_ptr[i].~T();
             }
         }
         m_rows = matrix.rows();
@@ -358,7 +404,14 @@ namespace linalg {
     }
     template <class T> template <class T2>
     Matrix<T>& Matrix<T>::operator-=(const Matrix<T2>& matrix) {
-        return *this += -matrix;
+        if (matrix.empty() || empty()) throw EmptyException();
+        if (matrix.columns() != m_columns || matrix.rows() != m_rows) throw InvalidSizesException();
+        for (size_t i = 0; i < m_rows; ++i) {
+            for (size_t j = 0; j < m_columns; ++j) {
+                (*this)(i, j) -= matrix(i, j);
+            }
+        }
+        return *this;
     }
     template <class T> template <class T2>
     Matrix<T>& Matrix<T>::operator*=(const Matrix<T2>& matrix) {
@@ -405,8 +458,9 @@ namespace linalg {
         T *tmp_ptr = reinterpret_cast<T *>(operator new(sizeof(T) * _capacity_));
         T *cur_ptr = tmp_ptr;
         try {
-            while(cur_ptr != tmp_ptr + _capacity_) {
-                new(cur_ptr) T();
+            size_t i = 0;
+            while (cur_ptr != tmp_ptr + m_rows * m_columns) {
+                new(cur_ptr) T(m_ptr[i++]);
                 ++cur_ptr;
             }
         } catch (...) {
@@ -416,26 +470,22 @@ namespace linalg {
             delete reinterpret_cast<void *>(tmp_ptr);
             throw;
         }
-        for (size_t i = 0; i < m_rows; ++i) {
-            for (size_t j = 0; j < m_columns; ++j) {
-                tmp_ptr[i * m_columns + j] = m_ptr[i * m_columns + j];
-            }
-        }
         if (!empty()) {
             for (T *del_ptr = m_ptr + m_columns * m_rows - 1; del_ptr >= m_ptr; --del_ptr) {
                 cur_ptr->~T();
             }
         }
+        delete reinterpret_cast<void *>(m_ptr);
         m_ptr = tmp_ptr;
         m_capacity = _capacity_;
     }
     template <class T>
     void Matrix<T>::shrink_to_fit() {
         if (m_capacity == m_columns * m_rows) return;
-        *this = Matrix<T>(*this);
+        *this = Matrix(*this);
     }
     template <class T>
-    void Matrix<T>::clear() noexcept{
+    void Matrix<T>::clear() noexcept {
         if (!empty()) {
             for (T *cur_ptr = m_ptr + m_columns * m_rows - 1; cur_ptr >= m_ptr; --cur_ptr) {
                 cur_ptr->~T();

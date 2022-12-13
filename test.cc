@@ -17,7 +17,7 @@ namespace linalg::tests {
                 MYTEST("Test clear()", clear_test(), showMore, false)
                 MYTEST("Test operators [],()", operator_bracket_test(), showMore, false)
                 MYTEST("Test operator =", assignment_operator_test(), showMore, false)
-                MYTEST("Test operators +,-,+=,-=", add_sub_operators_test(), showMore, true)
+                MYTEST("Test operators +,-,+=,-=", add_sub_operators_test(), showMore, false)
                 MYTEST("Test operator *", multiply_test(), showMore, false)
                 MYTEST("Test det & trans", trans_det_test(), showMore, false)
                 MYTEST("Test operator <<", print_test(), showMore, false)
